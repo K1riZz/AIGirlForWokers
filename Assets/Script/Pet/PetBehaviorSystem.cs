@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
+using UnityEditor.ProjectWindowCallback;
 using UnityEngine;
 
 
@@ -41,6 +42,7 @@ public class PetBehaviorSystem : MonoBehaviour
     private Vector2 targetPosition;
     private float stateTimer; // 通用状态计时器
     private float nextBehaviorDuration; // 下一个行为的持续时间
+    private Vector2 lastPosition; // 用于拖动时判断方向
 
     void Awake()
     {
@@ -48,7 +50,8 @@ public class PetBehaviorSystem : MonoBehaviour
         interactionSystem = GetComponent<PetInteractionSystem>();
         animator = GetComponent<Animator>();
         // 假设 DesktopInteraction 是一个单例或可以方便地找到
-        desktopInteraction = FindObjectOfType<DesktopInteraction>();
+            desktopInteraction = FindObjectOfType<DesktopInteraction>();
+        lastPosition = transform.position;
     }
 
     void Start()
@@ -127,11 +130,18 @@ public class PetBehaviorSystem : MonoBehaviour
         // 重置通用状态计时器
         stateTimer = 0f;
 
+        // 播放与新状态对应的动画
+        if (animator != null)
+        {
+            animator.Play(newState.ToString());
+        }
+
         // 每个状态的进入逻辑
         switch (newState)
         {
             case PetState.Idle:
                 nextBehaviorDuration = UnityEngine.Random.Range(idleTimeMin, idleTimeMax);
+                
                 break;
             case PetState.Moving:
                 // 目标位置应在切换到此状态之前设置好
@@ -175,6 +185,18 @@ public class PetBehaviorSystem : MonoBehaviour
 
     private void UpdateMovingState()
     {
+        // 根据移动方向翻转精灵图
+        if (targetPosition.x > transform.position.x && transform.localScale.x < 0)
+        {
+            // 朝右移动，但当前朝左，翻转
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else if (targetPosition.x < transform.position.x && transform.localScale.x > 0)
+        {
+            // 朝左移动，但当前朝右，翻转
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+
         transform.position = Vector2.MoveTowards(transform.position, targetPosition, moveSpeed * Time.deltaTime);
 
         if (Vector2.Distance(transform.position, targetPosition) < 0.1f)
@@ -197,12 +219,34 @@ public class PetBehaviorSystem : MonoBehaviour
     private void UpdateDraggingState()
     {
         // 位置更新由 PetInteractionSystem 在其 OnDrag 方法中处理
+        // 但我们可以在这里根据位置变化来翻转精灵
+        float horizontalMovement = transform.position.x - lastPosition.x;
+        if (horizontalMovement > 0.1f && transform.localScale.x < 0) // 使用小阈值防止抖动
+        {
+            transform.localScale = new Vector3(1, 1, 1); // 向右移动
+        }
+        else if (horizontalMovement < -0.1f && transform.localScale.x > 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1); // 向左移动
+        }
+        lastPosition = transform.position;
     }
 
     private void UpdateFollowingState()
     {
         // 平滑地跟随鼠标
         targetPosition = Input.mousePosition;
+
+        // 根据移动方向翻转精灵图
+        if (targetPosition.x > transform.position.x && transform.localScale.x < 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+        }
+        else if (targetPosition.x < transform.position.x && transform.localScale.x > 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+        }
+
         transform.position = Vector2.Lerp(transform.position, targetPosition, followSpeed * Time.deltaTime);
     }
 
