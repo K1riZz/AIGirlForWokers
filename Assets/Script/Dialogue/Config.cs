@@ -1,18 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class Config : MonoBehaviour
+/// <summary>
+/// A ScriptableObject to hold global game configuration settings.
+/// Create an instance via Assets > Create > AIGirl > Game Configuration.
+/// </summary>
+[CreateAssetMenu(fileName = "GameConfig", menuName = "AIGirl/Game Configuration", order = 0)]
+public class Config : ScriptableObject
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [Header("Pet Information")]
+    [Tooltip("The name of the pet.")]
+    public string PetName = "Aiko";
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    [Header("AI Dialogue Settings")]
+    [Tooltip("API Key for the Large Language Model service.")]
+    public string ApiKey;
+    [Tooltip("The endpoint URL for the LLM's chat completion API.")]
+    public string ApiEndpoint;
 }
