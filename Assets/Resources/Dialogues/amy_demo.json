@@ -1,0 +1,54 @@
+{
+  "conversations": [
+    {
+      "id": "PET_INTERACTION_CLICK_1",
+      "nodes": [
+        {
+          "nodeId": 0,
+          "speaker": "Pet",
+          "text": "你回来啦！今天工作辛苦吗？",
+          "choices": [
+            { "text": "还不错，今天很顺利。", "nextNodeId": 1 },
+            { "text": "有点累，想休息一下。", "nextNodeId": 2 }
+          ]
+        },
+        {
+          "nodeId": 1,
+          "speaker": "Pet",
+          "text": "太棒了！要不要听个笑话放松一下？",
+          "onEnter": { "triggerEvent": "SHOW_IMAGE", "eventData": "happy_pet.png" },
+          "isEnd": true
+        },
+        {
+          "nodeId": 2,
+          "speaker": "Pet",
+          "text": "辛苦了，快坐下歇歇吧。我给你倒杯水。",
+          "onExit": { "setStoryFlag": "PET_OFFERED_WATER" },
+          "isEnd": true
+        }
+      ]
+    },
+    {
+      "id": "PET_IDLE_1",
+      "nodes": [
+        {
+          "nodeId": 0,
+          "speaker": "Pet",
+          "text": "唔...今天天气真好，想出去散步。",
+          "isEnd": true
+        }
+      ]
+    },
+    {
+      "id": "REMINDER_STRETCH",
+      "nodes": [
+        {
+          "nodeId": 0,
+          "speaker": "Pet",
+          "text": "坐太久了，起来活动一下吧！",
+          "isEnd": true
+        }
+      ]
+    }
+  ]
+}

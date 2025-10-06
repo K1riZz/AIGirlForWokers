@@ -9,6 +9,12 @@ public class AIDialogueSystem : MonoBehaviour
 {
     // It's better to manage configuration in a central place.
     [SerializeField] private Config gameConfig;
+    private DialogueUI m_DialogueUI;
+
+    public void Setup(DialogueUI dialogueUI)
+    {
+        m_DialogueUI = dialogueUI;
+    }
 
     /// <summary>
     /// Receives player input and starts the process of getting a response from the LLM.
@@ -21,6 +27,11 @@ public class AIDialogueSystem : MonoBehaviour
             Debug.LogError("GameConfig is not assigned in AIDialogueSystem.", this);
             return;
         }
+        if (m_DialogueUI == null)
+        {
+            Debug.LogError("DialogueUI is not assigned in AIDialogueSystem. Was Setup() called from DialogueSystem?", this);
+            return;
+        }
 
         string storyContext = "";
         if (DialogueSystem.Instance != null && DialogueSystem.Instance.StoryManager != null)
@@ -29,7 +40,7 @@ public class AIDialogueSystem : MonoBehaviour
         }
 
         string prompt = $"Story context: {storyContext}\n\nPlayer: {playerInput}\n{gameConfig.PetName}:";
-        
+
         StartCoroutine(GetAIResponse(prompt));
     }
 
@@ -57,10 +68,10 @@ public class AIDialogueSystem : MonoBehaviour
         // Simulate a network delay and response for development
         yield return new WaitForSeconds(1.5f);
         string simulatedResponse = $"I'm not sure what to say about that, but it's interesting!";
-        
-        if (DialogueSystem.Instance != null)
+
+        if (m_DialogueUI != null)
         {
-            DialogueSystem.Instance.AiDialogueSystem.BroadcastMessage(gameConfig.PetName, simulatedResponse);
+            m_DialogueUI.AddAIChatMessage(gameConfig.PetName, simulatedResponse);
         }
     }
 }

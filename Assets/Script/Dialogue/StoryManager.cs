@@ -31,7 +31,7 @@ public class StoryManager : MonoBehaviour
         }
 
         Debug.Log($"StoryManager: '{completedConversationTitle}' conversation completed. Updating story state.");
-        
+
         m_UnlockedStoryNodes.Add(completedConversationTitle);
         SaveProgress();
     }

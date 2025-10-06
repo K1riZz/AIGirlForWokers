@@ -50,7 +50,7 @@ public class PetBehaviorSystem : MonoBehaviour
         interactionSystem = GetComponent<PetInteractionSystem>();
         animator = GetComponent<Animator>();
         // 假设 DesktopInteraction 是一个单例或可以方便地找到
-            desktopInteraction = FindObjectOfType<DesktopInteraction>();
+        desktopInteraction = FindObjectOfType<DesktopInteraction>();
         lastPosition = transform.position;
     }
 
@@ -141,7 +141,7 @@ public class PetBehaviorSystem : MonoBehaviour
         {
             case PetState.Idle:
                 nextBehaviorDuration = UnityEngine.Random.Range(idleTimeMin, idleTimeMax);
-                
+
                 break;
             case PetState.Moving:
                 // 目标位置应在切换到此状态之前设置好
@@ -334,7 +334,7 @@ public class PetBehaviorSystem : MonoBehaviour
             yield return new WaitForSeconds(60f);
 
             // 只有在宠物闲置时才触发提醒
-            if(currentState == PetState.Idle)
+            if (currentState == PetState.Idle)
                 ShowSpeechBubble("已经过去一分钟啦，要不要起来活动一下？", 5f);
         }
     }

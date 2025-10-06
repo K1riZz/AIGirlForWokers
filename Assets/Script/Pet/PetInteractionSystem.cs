@@ -25,7 +25,7 @@ public class PetInteractionSystem : MonoBehaviour, IPointerClickHandler, IBeginD
         }
     }
 
-     void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
+    void IBeginDragHandler.OnBeginDrag(PointerEventData eventData)
     {
         // 触发开始拖拽事件
         OnBeginDrag?.Invoke();

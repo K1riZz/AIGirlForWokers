@@ -24,5 +24,5 @@ public class DesktopInputHandler : MonoBehaviour, IPointerClickHandler
             petInteractionSystem.RequestGuide(eventData.position);
     }
 
-    
+
 }
