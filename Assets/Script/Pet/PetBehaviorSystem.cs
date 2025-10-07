@@ -22,8 +22,8 @@ public class PetBehaviorSystem : MonoBehaviour
     }
 
     [Header("组件引用")]
-    private PetInteractionSystem interactionSystem;
-    private DesktopInteraction desktopInteraction; // 假设此脚本存在，用于获取桌面信息
+    // private PetInteractionSystem interactionSystem; // 我们不再需要这个
+    // private DesktopInteraction desktopInteraction; // 假设此脚本存在，用于获取桌面信息
     [Tooltip("将宠物的对话气泡UI对象拖到这里")]
     public GameObject speechBubble;
     [Tooltip("将对话气泡中的Text - TextMeshPro组件拖到这里")]
@@ -47,34 +47,24 @@ public class PetBehaviorSystem : MonoBehaviour
     void Awake()
     {
         // 获取组件引用
-        interactionSystem = GetComponent<PetInteractionSystem>();
+        // interactionSystem = GetComponent<PetInteractionSystem>(); // 移除
         animator = GetComponent<Animator>();
         // 假设 DesktopInteraction 是一个单例或可以方便地找到
-        desktopInteraction = FindObjectOfType<DesktopInteraction>();
+        // desktopInteraction = FindObjectOfType<DesktopInteraction>(); // 暂时注释掉，如果需要再启用
         lastPosition = transform.position;
     }
 
     void Start()
     {
-        if (interactionSystem == null)
-        {
-            UnityEngine.Debug.LogError("未找到 PetInteractionSystem 组件！");
-        }
-        else
-        {
-            // 5. 引用PetInteractionSystem获取交互事件
-            interactionSystem.OnLeftClicked += HandlePetLeftClicked;
-            interactionSystem.OnRightClicked += HandlePetRightClicked;
-            interactionSystem.OnBeginDrag += HandleBeginDrag;
-            interactionSystem.OnEndDrag += HandleEndDrag;
-            interactionSystem.OnGuideRequest += HandleGuideRequest;
-        }
-
-        if (desktopInteraction == null)
-        {
-            UnityEngine.Debug.LogError("场景中未找到 DesktopInteraction 组件！");
-        }
-
+        // if (interactionSystem == null)
+        // {
+        //     // UnityEngine.Debug.LogError("未找到 PetInteractionSystem 组件！"); // 移除报错
+        // }
+        
+        // if (desktopInteraction == null)
+        // {
+        //     UnityEngine.Debug.LogError("场景中未找到 DesktopInteraction 组件！");
+        // }
         // 隐藏对话气泡
         if (speechBubble != null) speechBubble.SetActive(false);
 
@@ -85,15 +75,7 @@ public class PetBehaviorSystem : MonoBehaviour
 
     void OnDestroy()
     {
-        // 取消订阅以防止内存泄漏
-        if (interactionSystem != null)
-        {
-            interactionSystem.OnLeftClicked -= HandlePetLeftClicked;
-            interactionSystem.OnRightClicked -= HandlePetRightClicked;
-            interactionSystem.OnBeginDrag -= HandleBeginDrag;
-            interactionSystem.OnEndDrag -= HandleEndDrag;
-            interactionSystem.OnGuideRequest -= HandleGuideRequest;
-        }
+        // 移除事件取消订阅
     }
 
     // 3. 在Update中根据当前状态执行行为
@@ -170,9 +152,9 @@ public class PetBehaviorSystem : MonoBehaviour
         if (stateTimer >= nextBehaviorDuration)
         {
             // 决定下一步做什么：70%概率移动到图标，30%随机移动
-            if (UnityEngine.Random.value < 0.7f && desktopInteraction != null)
+            if (UnityEngine.Random.value < 0.7f /* && desktopInteraction != null */) // 暂时禁用与桌面的交互
             {
-                targetPosition = desktopInteraction.GetRandomIconPosition();
+                // targetPosition = desktopInteraction.GetRandomIconPosition();
                 SwitchState(PetState.Moving);
             }
             else
@@ -254,15 +236,26 @@ public class PetBehaviorSystem : MonoBehaviour
 
     #region 交互事件处理器
 
-    private void HandlePetLeftClicked()
+    public void HandlePetLeftClicked()
     {
         if (currentState != PetState.Dragging)
         {
-            ShowSpeechBubble("你点我干嘛呀？");
+            // 检查对话系统实例是否存在，并且当前没有正在进行的剧情对话
+            if (DialogueSystem.Instance != null && !DialogueSystem.Instance.IsConversationActive)
+            {
+                Debug.Log("Pet was clicked, starting interaction dialogue via PetBehaviorSystem.");
+                // 调用对话系统的交互对话方法
+                DialogueSystem.Instance.StartInteractionDialogue();
+            }
+            else
+            {
+                // 如果正在对话，可以说一些俏皮话
+                ShowSpeechBubble("正在跟你说正事呢！", 2f);
+            }
         }
     }
 
-    private void HandlePetRightClicked()
+    public void HandlePetRightClicked()
     {
         if (currentState != PetState.Dragging)
         {
@@ -278,17 +271,17 @@ public class PetBehaviorSystem : MonoBehaviour
         }
     }
 
-    private void HandleBeginDrag()
+    public void HandleBeginDrag()
     {
         SwitchState(PetState.Dragging);
     }
 
-    private void HandleEndDrag()
+    public void HandleEndDrag()
     {
         SwitchState(PetState.Idle); // 结束拖动后返回闲置状态
     }
 
-    private void HandleGuideRequest(Vector2 position)
+    public void HandleGuideRequest(Vector2 position)
     {
         // 只有在非拖动状态下才响应引导
         if (currentState != PetState.Dragging)
@@ -305,9 +298,9 @@ public class PetBehaviorSystem : MonoBehaviour
 
     private void SetRandomDestination()
     {
-        if (desktopInteraction == null) return;
-        // 4. 引用DesktopInteraction获取桌面图标位置
-        Vector2 screenBounds = desktopInteraction.GetScreenBounds();
+        // if (desktopInteraction == null) return; // 暂时禁用
+        // 使用 Screen.width 和 Screen.height 来获取屏幕边界
+        Vector2 screenBounds = new Vector2(Screen.width, Screen.height);
         // 增加一个边距，防止宠物完全移出屏幕
         float margin = 50f;
         targetPosition = new Vector2(
