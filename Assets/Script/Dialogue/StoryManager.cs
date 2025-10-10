@@ -15,7 +15,7 @@ public class StoryManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Destroy(gameObject);
+            Destroy(this); // 只销毁这个重复的组件，而不是整个GameObject
             return;
         }
         Instance = this;
